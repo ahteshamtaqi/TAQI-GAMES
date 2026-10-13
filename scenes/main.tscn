@@ -1,0 +1,70 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="2_player"]
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_game")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_world")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.9, -0.55, 0.0)
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.5, 0)
+
+[node name="GroundMesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("GroundMesh")
+
+[node name="GroundCollision" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("GroundShape")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+position = Vector3(0, 1, 0)
+script = ExtResource("2_player")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Player"]
+position = Vector3(0, 0.95, 0)
+mesh = SubResource("BodyMesh")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="Player"]
+position = Vector3(0, 1.72, 0)
+mesh = SubResource("HeadMesh")
+
+[node name="CameraPivot" type="Node3D" parent="Player"]
+position = Vector3(0, 1.4, 0)
+rotation = Vector3(-0.18, 0, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Player/CameraPivot"]
+spring_length = 5.0
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="Player/CameraPivot/SpringArm3D"]
+current = true
+fov = 75.0
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[sub_resource type="Environment" id="Environment_world"]
+background_mode = 1
+background_color = Color(0.42, 0.67, 0.84, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.78, 0.83, 0.9, 1)
+ambient_light_energy = 0.7
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="BoxShape3D" id="GroundShape"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="CapsuleMesh" id="BodyMesh"]
+radius = 0.38
+height = 1.4
+
+[sub_resource type="SphereMesh" id="HeadMesh"]
+radius = 0.28
+height = 0.56
