@@ -3,24 +3,55 @@ name: Build TAQI GAMES Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   export-android:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Verify files
+
+      - name: Verify project files
         run: |
           test -f project.godot
           test -f scenes/main.tscn
           test -f scripts/player.gd
-          mkdir -p build
+
+      - name: Install Android build tools
+        run: |
+          apt-get update
+          apt-get install -y openjdk-17-jdk unzip wget
+
+      - name: Configure Java
+        run: |
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=/usr/lib/android-sdk" >> "$GITHUB_ENV"
+
+      - name: Install Godot export templates
+        run: |
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz -O /tmp/templates.tpz
+          unzip -o /tmp/templates.tpz -d /tmp/godot-templates
+          find /tmp/godot-templates -name android_debug.apk -exec cp {} "$HOME/.local/share/godot/export_templates/4.3.stable/" \;
+          find /tmp/godot-templates -name android_release.apk -exec cp {} "$HOME/.local/share/godot/export_templates/4.3.stable/" \;
+          test -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
+          test -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_release.apk"
+
       - name: Export Android APK
-        run: godot --headless --verbose --path . --export-debug "Android" build/TAQI-GAMES.apk
+        run: |
+          mkdir -p build
+          godot --headless --path . --editor --quit
+          godot --headless --path . --verbose --export-debug "Android" build/TAQI-GAMES.apk
+
+      - name: Verify APK
+        run: |
+          test -s build/TAQI-GAMES.apk
+          ls -lh build/TAQI-GAMES.apk
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
