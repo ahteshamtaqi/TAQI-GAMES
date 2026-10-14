@@ -26,21 +26,32 @@ jobs:
           test -f scenes/main.tscn
           test -f scripts/player.gd
 
-      - name: Install Java and Android SDK
+            - name: Install Java and Android SDK
         run: |
+          set -e
+
           apt-get update
-          apt-get install -y openjdk-17-jdk unzip wget
+          apt-get install -y openjdk-17-jdk unzip wget curl ca-certificates
 
           mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/android-commandline-tools.zip
+
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip \
+            -O /tmp/android-commandline-tools.zip
+
           mkdir -p /tmp/android-cmdline
           unzip -q /tmp/android-commandline-tools.zip -d /tmp/android-cmdline
-          rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/latest"
-          mv /tmp/android-cmdline/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+
+          mv /tmp/android-cmdline/cmdline-tools \
+            "$ANDROID_SDK_ROOT/cmdline-tools/latest"
 
           export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
-          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null || true
-          sdkmanager --sdk_root="$ANDROID_SDK_ROOT"             "platform-tools"             "platforms;android-34"             "build-tools;34.0.0"             "ndk;23.2.8568313"             "cmake;3.10.2"
+
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+
+          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
       - name: Install Godot 4.3 export templates
         run: |
