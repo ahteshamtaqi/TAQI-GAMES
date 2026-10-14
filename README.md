@@ -1,21 +1,19 @@
-# TAQI GAMES — PLAY • FIGHT • SURVIVE
+# TAQI GAMES — Visual Milestone 1
 
-Free early-stage 3D third-person prototype built with Godot 4.
+Godot 4.3 mobile third-person training-island prototype. This update focuses on making the character and environment more readable while keeping the existing Android export workflow intact.
 
-## Included in this starter
-- Simple 3D outdoor test area with primitive trees
-- Human-shaped placeholder character
-- Third-person follow camera
-- Keyboard movement and jump for testing
-- Basic on-screen jump button and touch camera input
-- TAQI GAMES branding
+## What changed
+- Replaced the visible two-shape capsule placeholder with a more detailed, procedurally assembled low-poly tactical soldier: helmet, face, torso, vest, pouches, backpack, limbs, boots, gloves and a rifle silhouette.
+- Added a player collision shape so the CharacterBody3D can properly stand and move on the ground.
+- Expanded the training island with varied tree canopies, rocks, three blockout buildings with collision, windows/doors and supply crates.
+- Added a centered crosshair and moved the jump control to a screen-edge anchored position for different phone sizes.
+- Preserved the current project structure and `.github/workflows/android-build.yml` export workflow.
 
-This is not yet a complete battle royale game. Weapons, bots, aircraft, parachutes, vehicles, online multiplayer, accounts, rewards and gifting are not included yet.
+## Important limitations
+This is a **visual prototype**, not a BGMI/PUBG-quality game. The soldier is procedural low-poly geometry, not a rigged/skinned character model; it does not yet have proper skeletal animations. The rifle is visual only: no shooting, damage, bots, loot interaction, shrinking zone, plane/parachute, vehicles, accounts, rewards, or internet multiplayer have been implemented in this milestone. The buildings are simple blockout geometry. An APK build succeeding only confirms export/packaging, not that the game has been runtime-tested on a phone.
 
-## Open the project
-Import the folder containing `project.godot` in Godot 4.3 or compatible Godot 4.x, then press Play.
+## Build
+Upload the contents of this ZIP to the root of the existing `TAQI-GAMES` repository, preserving `.github/workflows/android-build.yml`, then run the existing Android build workflow. Do not replace the workflow if it is already succeeding. Install the resulting APK and test movement, camera, jumping, and collision before proceeding to the next milestone.
 
-## GitHub upload
-Upload the contents of this ZIP into the root of the `TAQI-GAMES` repository. Preserve the `.github/workflows` directory.
-
-The Android workflow is an initial build attempt. If the runner lacks a compatible Android export template or SDK, inspect the Actions log and adjust the workflow before assuming an APK was produced.
+## Next milestone
+Integrate a properly licensed rigged humanoid model with skeletal animations, then implement an actual weapon/combat loop. Do not describe the current procedural soldier as a realistic production character.
