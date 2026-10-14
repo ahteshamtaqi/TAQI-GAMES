@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="2_player"]
@@ -12,6 +12,7 @@ environment = SubResource("Environment_world")
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation = Vector3(-0.9, -0.55, 0.0)
 shadow_enabled = true
+light_energy = 1.15
 
 [node name="Ground" type="StaticBody3D" parent="."]
 position = Vector3(0, -0.5, 0)
@@ -23,20 +24,11 @@ mesh = SubResource("GroundMesh")
 shape = SubResource("GroundShape")
 
 [node name="Player" type="CharacterBody3D" parent="."]
-position = Vector3(0, 0, 0)
+position = Vector3(0, 1, 0)
 script = ExtResource("2_player")
 
-[node name="PlayerCollision" type="CollisionShape3D" parent="Player"]
-position = Vector3(0, 1.02, 0)
-shape = SubResource("PlayerShape")
-
-[node name="BodyMesh" type="MeshInstance3D" parent="Player"]
-position = Vector3(0, 0.95, 0)
-mesh = SubResource("BodyMesh")
-
-[node name="HeadMesh" type="MeshInstance3D" parent="Player"]
-position = Vector3(0, 1.72, 0)
-mesh = SubResource("HeadMesh")
+[node name="CharacterVisual" type="Node3D" parent="Player"]
+position = Vector3(0, -1.0, 0)
 
 [node name="CameraPivot" type="Node3D" parent="Player"]
 position = Vector3(0, 1.4, 0)
@@ -54,25 +46,17 @@ fov = 75.0
 
 [sub_resource type="Environment" id="Environment_world"]
 background_mode = 1
-background_color = Color(0.42, 0.67, 0.84, 1)
+background_color = Color(0.46, 0.68, 0.86, 1)
 ambient_light_source = 3
-ambient_light_color = Color(0.78, 0.83, 0.9, 1)
-ambient_light_energy = 0.7
+ambient_light_color = Color(0.82, 0.86, 0.92, 1)
+ambient_light_energy = 0.85
+tonemap_mode = 2
+ssao_enabled = true
+ssao_radius = 1.5
+ssao_intensity = 1.0
 
 [sub_resource type="BoxMesh" id="GroundMesh"]
 size = Vector3(100, 1, 100)
 
 [sub_resource type="BoxShape3D" id="GroundShape"]
 size = Vector3(100, 1, 100)
-
-[sub_resource type="CapsuleMesh" id="BodyMesh"]
-radius = 0.38
-height = 1.4
-
-[sub_resource type="SphereMesh" id="HeadMesh"]
-radius = 0.28
-height = 0.56
-
-[sub_resource type="CapsuleShape3D" id="PlayerShape"]
-radius = 0.38
-height = 2.05
