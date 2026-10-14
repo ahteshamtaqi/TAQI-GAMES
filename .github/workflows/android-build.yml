@@ -3,7 +3,7 @@ name: Build TAQI GAMES Android APK
 on:
   workflow_dispatch:
   push:
-    branches: ["main","Visual-milestone1"]
+    branches: ["Visual-milestone1"]
 
 jobs:
   export-android:
