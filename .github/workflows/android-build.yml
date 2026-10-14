@@ -11,6 +11,11 @@ jobs:
     container:
       image: barichello/godot-ci:4.3
 
+    env:
+      ANDROID_SDK_ROOT: /opt/android-sdk
+      ANDROID_HOME: /opt/android-sdk
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,30 +26,53 @@ jobs:
           test -f scenes/main.tscn
           test -f scripts/player.gd
 
-      - name: Install Android build tools
+      - name: Install Java and Android SDK
         run: |
           apt-get update
           apt-get install -y openjdk-17-jdk unzip wget
 
-      - name: Configure Java
-        run: |
-          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> "$GITHUB_ENV"
-          echo "ANDROID_HOME=/usr/lib/android-sdk" >> "$GITHUB_ENV"
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/android-commandline-tools.zip
+          mkdir -p /tmp/android-cmdline
+          unzip -q /tmp/android-commandline-tools.zip -d /tmp/android-cmdline
+          rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          mv /tmp/android-cmdline/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
 
-      - name: Install Godot export templates
-        run: |
-          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
-          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz -O /tmp/templates.tpz
-          unzip -o /tmp/templates.tpz -d /tmp/godot-templates
-          find /tmp/godot-templates -name android_debug.apk -exec cp {} "$HOME/.local/share/godot/export_templates/4.3.stable/" \;
-          find /tmp/godot-templates -name android_release.apk -exec cp {} "$HOME/.local/share/godot/export_templates/4.3.stable/" \;
-          test -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
-          test -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_release.apk"
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null || true
+          sdkmanager --sdk_root="$ANDROID_SDK_ROOT"             "platform-tools"             "platforms;android-34"             "build-tools;34.0.0"             "ndk;23.2.8568313"             "cmake;3.10.2"
 
-      - name: Export Android APK
+      - name: Install Godot 4.3 export templates
         run: |
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/4.3.stable"
+          mkdir -p "$TEMPLATE_DIR"
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz -O /tmp/godot-templates.tpz
+          mkdir -p /tmp/godot-templates
+          unzip -q /tmp/godot-templates.tpz -d /tmp/godot-templates
+          find /tmp/godot-templates -name android_debug.apk -exec cp {} "$TEMPLATE_DIR/android_debug.apk" \;
+          find /tmp/godot-templates -name android_release.apk -exec cp {} "$TEMPLATE_DIR/android_release.apk" \;
+          test -s "$TEMPLATE_DIR/android_debug.apk"
+          test -s "$TEMPLATE_DIR/android_release.apk"
+
+      - name: Configure Godot Android paths
+        run: |
+          mkdir -p "$HOME/.config/godot"
+          # Let Godot initialize its editor settings file.
+          godot --headless --editor --path . --quit || true
+          SETTINGS="$HOME/.config/godot/editor_settings-4.tres"
+          touch "$SETTINGS"
+          if ! grep -q 'export/android/android_sdk_path' "$SETTINGS"; then
+            printf '\nexport/android/android_sdk_path = "%s"\n' "$ANDROID_SDK_ROOT" >> "$SETTINGS"
+          fi
+          if ! grep -q 'export/android/java_sdk_path' "$SETTINGS"; then
+            printf 'export/android/java_sdk_path = "%s"\n' "$JAVA_HOME" >> "$SETTINGS"
+          fi
+
+      - name: Import project and export Android APK
+        run: |
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
           mkdir -p build
-          godot --headless --path . --editor --quit
+          godot --headless --editor --path . --quit
           godot --headless --path . --verbose --export-debug "Android" build/TAQI-GAMES.apk
 
       - name: Verify APK
@@ -58,3 +86,4 @@ jobs:
           name: TAQI-GAMES-Android-APK
           path: build/TAQI-GAMES.apk
           if-no-files-found: error
+          
