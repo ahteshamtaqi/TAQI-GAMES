@@ -27,8 +27,8 @@ jobs:
           test -f scripts/player.gd
 
             - name: Install Java and Android SDK
-        run: |
-          set -e
+              run: |
+                set -e
 
           apt-get update
           apt-get install -y openjdk-17-jdk unzip wget curl ca-certificates
