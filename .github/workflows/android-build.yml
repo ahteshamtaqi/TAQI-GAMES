@@ -65,10 +65,13 @@ jobs:
           set -e
           JAVA_HOME_DIR="$(dirname "$(dirname "$(readlink -f "$(which keytool)")")")"
           echo "JAVA_HOME_DIR=$JAVA_HOME_DIR"
-          keytool -keyalg RSA -genkeypair -alias androiddebugkey \
-            -keypass android -keystore /root/debug.keystore \
-            -storepass android -dname "CN=Android Debug,O=Android,C=US" \
-            -validity 9999 -deststoretype pkcs12
+          # The godot-ci image already ships /root/debug.keystore, so only create it if missing
+          if [ ! -f /root/debug.keystore ]; then
+            keytool -keyalg RSA -genkeypair -alias androiddebugkey \
+              -keypass android -keystore /root/debug.keystore \
+              -storepass android -dname "CN=Android Debug,O=Android,C=US" \
+              -validity 9999 -deststoretype pkcs12
+          fi
           echo "$JAVA_HOME_DIR" > /tmp/java_home
 
       - name: Enable ETC2/ASTC import (required for Android export)
